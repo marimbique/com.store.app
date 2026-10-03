@@ -1,0 +1,852 @@
+# Spring Data JPA Learning Project
+
+## Goal
+
+Learn Spring Data JPA through a realistic Order Management System instead of isolated examples.
+
+By the end of this project you will understand:
+
+- Entity mapping
+- Repository pattern
+- CRUD operations
+- Query Methods
+- JPQL
+- Relationships
+- Pagination
+- Sorting
+- Specifications
+- Performance tuning
+- N+1 problem
+- Aggregation queries
+
+---
+
+# Business Context
+
+Our company sells products through stores.
+
+Products are stored in warehouses and shipped to customers using carriers.
+
+The application must manage:
+
+- Customers
+- Products
+- Stores
+- Warehouses
+- Stock
+- Orders
+- Order Items
+- Carriers
+- Shipments
+
+---
+
+# Domain Model
+
+```text
+Customer
+   |
+   | 1:N
+   |
+Order
+   |
+   | 1:N
+   |
+OrderItem
+   |
+   | N:1
+   |
+Product
+
+Store
+Warehouse
+WarehouseStock
+Carrier
+Shipment
+```
+
+---
+
+# Entity Overview
+
+## Customer
+
+Represents a customer that places orders.
+
+Attributes:
+
+- id
+- name
+- email
+- city
+
+Example:
+
+```java
+@Entity
+public class Customer {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    private String name;
+
+    private String email;
+
+    private String city;
+}
+```
+
+---
+
+## Product
+
+Represents a product sold by the company.
+
+Attributes:
+
+- id
+- sku
+- name
+- price
+
+Example:
+
+```java
+@Entity
+public class Product {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    private String sku;
+
+    private String name;
+
+    private BigDecimal price;
+}
+```
+
+---
+
+## Store
+
+Represents a physical or online store.
+
+Attributes:
+
+- id
+- name
+- city
+
+---
+
+## Warehouse
+
+Represents a storage facility.
+
+Attributes:
+
+- id
+- name
+- city
+
+---
+
+## WarehouseStock
+
+Represents inventory for a specific product in a warehouse.
+
+Attributes:
+
+- id
+- warehouse
+- product
+- quantity
+
+Relationship:
+
+```text
+Warehouse
+    |
+    | 1:N
+    |
+WarehouseStock
+    |
+    | N:1
+    |
+Product
+```
+
+---
+
+## Order
+
+Represents a customer's purchase.
+
+Attributes:
+
+- id
+- createdAt
+- customer
+- store
+
+Relationship:
+
+```text
+Customer
+    |
+    | 1:N
+    |
+Order
+```
+
+---
+
+## OrderItem
+
+Represents a product inside an order.
+
+Attributes:
+
+- id
+- order
+- product
+- quantity
+- unitPrice
+
+Relationship:
+
+```text
+Order
+    |
+    | 1:N
+    |
+OrderItem
+```
+
+---
+
+## Carrier
+
+Represents a shipping company.
+
+Examples:
+
+- DHL
+- UPS
+- FedEx
+- CTT
+
+Attributes:
+
+- id
+- name
+- trackingUrl
+
+---
+
+## Shipment
+
+Represents the shipment of an order.
+
+Attributes:
+
+- id
+- trackingNumber
+- carrier
+- order
+
+Relationship:
+
+```text
+Shipment
+    |
+    | N:1
+    |
+Carrier
+
+Shipment
+    |
+    | 1:1
+    |
+Order
+```
+
+---
+
+# Use Cases
+
+---
+
+# Use Case 1 - Register Customer
+
+## Requirement
+
+As an operator I want to register customers so they can place orders.
+
+### Endpoint
+
+```http
+POST /customers
+```
+
+### Spring Data Concepts
+
+- Entity
+- Repository
+- save()
+
+### Learning Goal
+
+Understand basic persistence.
+
+---
+
+# Use Case 2 - Search Customers by City
+
+## Requirement
+
+As a user I want to find customers from a specific city.
+
+### Endpoint
+
+```http
+GET /customers?city=Lisbon
+```
+
+### Repository Method
+
+```java
+List<Customer> findByCity(String city);
+```
+
+### Learning Goal
+
+Query Method Derivation.
+
+---
+
+# Use Case 3 - Product Catalogue
+
+## Requirement
+
+View available products.
+
+### Endpoints
+
+```http
+GET /products
+GET /products/{id}
+```
+
+### Learning Goal
+
+Basic CRUD operations.
+
+---
+
+# Use Case 4 - Search Products
+
+## Requirement
+
+Find products by criteria.
+
+### Repository Examples
+
+```java
+findByNameContaining(String text)
+
+findByPriceLessThan(BigDecimal price)
+
+findByPriceGreaterThan(BigDecimal price)
+```
+
+### Learning Goal
+
+Derived Queries.
+
+---
+
+# Use Case 5 - Warehouse Inventory
+
+## Requirement
+
+Check stock availability.
+
+### Endpoint
+
+```http
+GET /stock
+```
+
+### Repository Example
+
+```java
+findByProductId(Long productId)
+```
+
+### Learning Goal
+
+Many-to-One relationships.
+
+---
+
+# Use Case 6 - Register Store
+
+## Requirement
+
+Create stores that can sell products.
+
+### Endpoint
+
+```http
+POST /stores
+```
+
+### Learning Goal
+
+Simple entity management.
+
+---
+
+# Use Case 7 - Create Order
+
+## Requirement
+
+A customer purchases products.
+
+### Endpoint
+
+```http
+POST /orders
+```
+
+### Relationships Introduced
+
+```java
+@ManyToOne
+Customer
+
+@ManyToOne
+Store
+```
+
+### Learning Goal
+
+Entity relationships.
+
+---
+
+# Use Case 8 - Add Order Items
+
+## Requirement
+
+Orders contain multiple products.
+
+### Endpoint
+
+```http
+POST /orders/{id}/items
+```
+
+### Learning Goal
+
+One-to-Many relationships.
+
+---
+
+# Use Case 9 - Create Shipment
+
+## Requirement
+
+Ship customer orders.
+
+### Endpoint
+
+```http
+POST /shipments
+```
+
+### Learning Goal
+
+One-to-One relationships.
+
+---
+
+# Use Case 10 - Orders By Customer
+
+## Requirement
+
+Show all orders for a customer.
+
+### Repository
+
+```java
+findByCustomerId(Long customerId)
+```
+
+### Learning Goal
+
+Navigating relationships through query methods.
+
+---
+
+# Use Case 11 - Orders By Date Range
+
+## Requirement
+
+Show orders placed between two dates.
+
+### Repository
+
+```java
+findByCreatedAtBetween(
+    LocalDateTime start,
+    LocalDateTime end
+)
+```
+
+### Learning Goal
+
+Date queries.
+
+---
+
+# Use Case 12 - Top Customers
+
+## Requirement
+
+Show customers with highest sales volume.
+
+### JPQL Example
+
+```java
+@Query("""
+SELECT o.customer,
+       SUM(i.quantity * i.unitPrice)
+FROM Order o
+JOIN OrderItem i
+ON i.order = o
+GROUP BY o.customer
+ORDER BY SUM(i.quantity * i.unitPrice) DESC
+""")
+```
+
+### Learning Goal
+
+- JPQL
+- Aggregation
+- GROUP BY
+
+---
+
+# Use Case 13 - Best Selling Products
+
+## Requirement
+
+Identify most sold products.
+
+### Concepts
+
+- SUM
+- GROUP BY
+- Reporting queries
+
+### Learning Goal
+
+Analytical queries.
+
+---
+
+# Use Case 14 - Pagination
+
+## Requirement
+
+Support millions of orders.
+
+### Example
+
+```java
+Page<Order> findAll(Pageable pageable);
+```
+
+Usage:
+
+```java
+PageRequest.of(
+    0,
+    20,
+    Sort.by("createdAt")
+)
+```
+
+### Learning Goal
+
+- Page
+- Pageable
+- Sort
+
+---
+
+# Use Case 15 - Dynamic Search
+
+## Requirement
+
+Filter orders by:
+
+- Customer
+- Store
+- Carrier
+- Date Range
+- Product
+
+### Technology
+
+```java
+Specification<Order>
+```
+
+### Learning Goal
+
+Specifications.
+
+---
+
+# Use Case 16 - N+1 Problem
+
+## Requirement
+
+Load order details efficiently.
+
+### Bad Example
+
+```java
+List<Order> orders =
+    repository.findAll();
+
+orders.forEach(order -> {
+    order.getCustomer();
+    order.getItems();
+});
+```
+
+### Solution
+
+```java
+@EntityGraph
+```
+
+or
+
+```java
+JOIN FETCH
+```
+
+### Learning Goal
+
+Performance optimization.
+
+---
+
+# Repository Exercises
+
+Create repositories for:
+
+```java
+CustomerRepository
+
+ProductRepository
+
+StoreRepository
+
+WarehouseRepository
+
+WarehouseStockRepository
+
+OrderRepository
+
+OrderItemRepository
+
+CarrierRepository
+
+ShipmentRepository
+```
+
+---
+
+# Advanced Challenges
+
+## Challenge 1
+
+Find all customers who never placed an order.
+
+---
+
+## Challenge 2
+
+Find products with stock below 10 units.
+
+---
+
+## Challenge 3
+
+Find orders not shipped yet.
+
+---
+
+## Challenge 4
+
+Calculate total revenue per store.
+
+---
+
+## Challenge 5
+
+Calculate total revenue per month.
+
+---
+
+## Challenge 6
+
+Find top 10 products sold.
+
+---
+
+## Challenge 7
+
+Build a dashboard endpoint with:
+
+- Total orders
+- Total revenue
+- Total customers
+- Total products sold
+
+---
+
+# Learning Roadmap
+
+## Week 1
+
+### Fundamentals
+
+- Customer
+- Product
+- Store
+
+Learn:
+
+- Entities
+- Repositories
+- CRUD
+- save()
+- findAll()
+
+---
+
+## Week 2
+
+### Relationships
+
+- Order
+- OrderItem
+
+Learn:
+
+- OneToMany
+- ManyToOne
+
+---
+
+## Week 3
+
+### Inventory
+
+- Warehouse
+- WarehouseStock
+
+Learn:
+
+- Inventory modelling
+- Complex relationships
+
+---
+
+## Week 4
+
+### Shipping
+
+- Carrier
+- Shipment
+
+Learn:
+
+- OneToOne
+- Business flows
+
+---
+
+## Week 5
+
+### Querying
+
+Learn:
+
+- Query Methods
+- JPQL
+- Sorting
+- Pagination
+
+---
+
+## Week 6
+
+### Enterprise Topics
+
+Learn:
+
+- Specifications
+- N+1 Problem
+- EntityGraph
+- JOIN FETCH
+- Performance Optimisation
+
+---
+
+# Final Objective
+
+Build a complete Order Management System exposing:
+
+```http
+/api/customers
+/api/products
+/api/stores
+/api/warehouses
+/api/stock
+/api/orders
+/api/order-items
+/api/carriers
+/api/shipments
+```
+
+while mastering:
+
+✅ Spring Boot
+
+✅ Spring Data JPA
+
+✅ Entity Relationships
+
+✅ JPQL
+
+✅ Specifications
+
+✅ Pagination
+
+✅ Sorting
+
+✅ Query Optimization
+
+✅ Enterprise Application Design
