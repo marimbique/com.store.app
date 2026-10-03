@@ -1,0 +1,13 @@
+services:
+  app:
+    build: .
+    container_name: orderhub-app
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: ${DB_URL:-jdbc:postgresql://ep-wild-star-b5v51m0m-pooler.c-7.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require}
+      DB_USERNAME: ${DB_USERNAME:-neondb_owner}
+      DB_PASSWORD: ${DB_PASSWORD:?Configure DB_PASSWORD in .env}
+      JWT_SECRET: docker-compose-secret-please-override-in-real-envs-42
+      TZ: Europe/Dublin
+    ports:
+      - "8080:8080"
