@@ -1,0 +1,72 @@
+# Compiled files
+*.class
+
+# Log files
+*.log
+
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Gradle
+.gradle/
+build/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# NetBeans
+nbproject/private/
+build/
+dist/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.*
+
+# Spring Boot
+spring.log
+
+# H2 Database files
+*.mv.db
+*.trace.db
+
+# Temporary files
+tmp/
+temp/
+
+# Java crash logs
+hs_err_pid*
+replay_pid*
+
+# Lombok generated metadata
+lombok.config
+
+# Maven Wrapper logs
+.maven/
+
+# Application secrets
+application-local.properties
+application-local.yml
+application-dev.properties
+application-dev.yml
+
+# JDK local
+oracleJdk-25/
+# Ou qualquer JDK dentro do projeto
+jdk/
+jre/
+*.jdk/
