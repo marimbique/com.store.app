@@ -850,3 +850,55 @@ while mastering:
 ✅ Query Optimization
 
 ✅ Enterprise Application Design
+
+
+
+src/main/java/com/company/ordermanagement
+
+├── common
+│   ├── exception
+│   ├── config
+│   ├── mapper
+│   ├── util
+│   └── validation
+│
+├── customer
+│   ├── controller
+│   ├── service
+│   ├── repository
+│   ├── entity
+│   ├── dto
+│   └── mapper
+│
+├── product
+│   ├── controller
+│   ├── service
+│   ├── repository
+│   ├── entity
+│   ├── dto
+│   └── mapper
+│
+├── order
+│   ├── controller
+│   ├── service
+│   ├── repository
+│   ├── entity
+│   ├── dto
+│   ├── specification
+│   └── mapper
+│
+├── warehouse
+│   ├── controller
+│   ├── service
+│   ├── repository
+│   ├── entity
+│   └── dto
+│
+├── shipment
+│   ├── controller
+│   ├── service
+│   ├── repository
+│   ├── entity
+│   └── dto
+│
+└── OrderManagementApplication.java
